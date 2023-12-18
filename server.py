@@ -12,8 +12,8 @@ import aiocoap
 
 from pathlib import Path
 
-DEFAULT_IP_ADRESS = "2600:1900:4150:7757:0:0:0:0"
-DEFAULT_PORT = 8683
+DEFAULT_IP_ADRESS = "10.166.0.2"
+DEFAULT_PORT = 5683
 
 class TemperatureResource(resource.Resource):
     """Resource to put Temperature data to the server. It supports only PUT methods."""
