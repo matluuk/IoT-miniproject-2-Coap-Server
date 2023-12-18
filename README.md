@@ -172,6 +172,11 @@ Connect to the linux VM, where you want the the CoAp server to be deployed.
         python3 -m venv ./venv
         ```
 
+    * Activate the python venv
+        ```bash
+        source ./venv/bin/activate
+        ```
+
 5. install aiocoap
 
     First all dependencies have to be installed:
