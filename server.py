@@ -12,6 +12,8 @@ import aiocoap
 
 from pathlib import Path
 
+import database
+
 DEFAULT_IP_ADRESS = "10.166.0.2"
 DEFAULT_PORT = 5683
 
@@ -30,10 +32,42 @@ class TemperatureResource(resource.Resource):
         print('PUT payload: %s' % request.payload)
         self.logger.info('PUT payload: %s' % request.payload)
         self.set_content(request.payload)
-        temperature = request.payload # .decode()
+        temperature = request.payload.decode()
         write_temperature_to_file(temperature)
         
         return aiocoap.Message(code=aiocoap.CHANGED)
+    
+class DataResource(resource.Resource):
+    """Resource to post data to the server and store it for client. It supports POST and GET methods."""
+
+    def __init__(self):
+        super().__init__()
+        self.set_content(0)
+        self.logger = logging.getLogger('TemperatureResource')
+
+    def set_content(self, content):
+        self.content = content
+
+    async def render_post(self, request):
+        print('POST payload: %s' % request.payload)
+        self.logger.info('POST payload: %s' % request.payload)
+        self.set_content(request.payload)
+        data = request.payload.decode()
+        db.write_data_to_db(data)
+        
+        return aiocoap.Message(code=aiocoap.CHANGED)
+
+    async def render_get(self, request):
+        print('GET payload: %s' % request.payload)
+        self.logger.info('GET payload: %s' % request.payload)
+        self.set_content(request.payload)
+        request_msg = request.payload.decode()
+
+        # Read data from database
+        data = db.read_data_from_db()
+
+        # Send the file data as payload
+        return aiocoap.Message(payload=str(data).encode(), code=aiocoap.CONTENT)
 
 def set_logger():
     logs_dir = os.path.join(Path(__file__).resolve().parent, "logs")
@@ -71,12 +105,17 @@ async def main():
     set_logger()
     logger = logging.getLogger("main")
 
+    # Create an instance of the Database class
+    global db
+    db = database.Database()
+
     # Resource tree creation
     root = resource.Site()
 
     root.add_resource(['.well-known', 'core'],
             resource.WKCResource(root.get_resources_as_linkheader))
     root.add_resource(['temperature'], TemperatureResource())
+    root.add_resource(['temperature'], DataResource())
 
     ip_address = DEFAULT_IP_ADRESS
     port = DEFAULT_PORT

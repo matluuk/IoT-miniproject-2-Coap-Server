@@ -3,3 +3,5 @@ logs/
 data/
 *.log
 save_pid.txt
+sqlite_database.db
+__pycache__/
