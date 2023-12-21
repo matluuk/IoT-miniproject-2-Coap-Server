@@ -54,8 +54,8 @@ class Database():
                       "active_mode INTEGER, " +
                       "location_timeout INTEGER, " +
                       "active_wait_timeout INTEGER, " +
-                      "passive_wait_timeout INTEGER), " +
-                      "PRIMARY KEY(device_id)")
+                      "passive_wait_timeout INTEGER, " +
+                      "PRIMARY KEY(device_id))")
         except Error as e:
             logger.error(e)
             raise
