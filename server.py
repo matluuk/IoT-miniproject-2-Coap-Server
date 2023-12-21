@@ -80,6 +80,7 @@ class DeviceConfigResource(resource.Resource):
     async def render_get(self, request):
         try:
             device_id = request.payload.decode()
+            self.logger.debug(f"Received device_id: {device_id}")
             device_config = self.db.read_device_config(device_id)
             return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.JSON)
         except Exception as e:
