@@ -1,6 +1,11 @@
 import sqlite3
 from sqlite3 import Error
 
+import logging
+logger = logging.getLogger('database')
+
+# This class is used to create a SQLite database and write data to it
+
 class Database():
     def __init__(self):
         self.conn = self.__create_connection()
@@ -9,9 +14,9 @@ class Database():
         conn = None
         try:
             conn = sqlite3.connect('sqlite_database.db')  # Creates a SQLite database in the current directory
-            print(sqlite3.version)
+            logger.info(sqlite3.version)
         except Error as e:
-            print(e)
+            logger.error(e)
         return conn
 
     def intialize_db(self):
@@ -28,7 +33,7 @@ class Database():
                     "altitude REAL, " +
                     "accuracy REAL)")
         except Error as e:
-            print(e)
+            logger.error(e)
     
     def create_device_configs_table(self):
         try:
@@ -41,7 +46,7 @@ class Database():
                       "passive_wait_timeout INTEGER), " +
                       "PRIMARY KEY(device_id)")
         except Error as e:
-            print(e)
+            logger.error(e)
 
     def write_data(self, data):
         try:
@@ -51,7 +56,7 @@ class Database():
                     VALUES (:time, :latitude, :longitude, :altitude, :accuracy)
                 """, data)
         except Error as e:
-            print(e)
+            logger.error(e)
 
     def read_all_data(self):
         try:
@@ -61,7 +66,7 @@ class Database():
             data = [dict(zip(columns, row)) for row in c.fetchall()]
             return data
         except Error as e:
-            print(e)
+            logger.error(e)
     
     def update_device_config(self, device_config):
         try:
@@ -76,7 +81,7 @@ class Database():
             """, (device_config["active_mode"], device_config["location_timeout"], device_config["active_wait_timeout"], device_config["passive_wait_timeout"], device_config["device_id"]))
             self.conn.commit()
         except Error as e: 
-            print(e)
+            logger.error(e)
 
     def read_device_config(self, device_id):
         try:
@@ -88,4 +93,4 @@ class Database():
                 return None
             return dict(zip(columns, data))
         except Error as e:
-            print(e)
+            logger.error(e)
