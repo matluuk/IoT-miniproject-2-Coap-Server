@@ -73,7 +73,7 @@ class Database():
                     active_wait_timeout = ?, 
                     passive_wait_timeout = ? 
                 WHERE device_id = ?
-            """, (device_config.active_mode, device_config.location_timeout, device_config.active_wait_timeout, device_config.passive_wait_timeout, device_config.device_id))
+            """, (device_config["active_mode"], device_config["location_timeout"], device_config["active_wait_timeout"], device_config["passive_wait_timeout"], device_config["device_id"]))
             self.conn.commit()
         except Error as e: 
             print(e)
