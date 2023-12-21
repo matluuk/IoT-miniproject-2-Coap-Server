@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import logging
 import os
@@ -43,6 +44,7 @@ class DataResource(resource.Resource):
     def __init__(self):
         super().__init__()
         self.set_content(0)
+        self.db = database.Database()
         self.logger = logging.getLogger('TemperatureResource')
 
     def set_content(self, content):
@@ -52,8 +54,9 @@ class DataResource(resource.Resource):
         print('POST payload: %s' % request.payload)
         self.logger.info('POST payload: %s' % request.payload)
         self.set_content(request.payload)
-        data = request.payload.decode()
-        db.write_data_to_db(data)
+        data_json = request.payload.decode()
+        data = json.loads(data_json)
+        self.db.write_data(data)
         
         return aiocoap.Message(code=aiocoap.CHANGED)
 
@@ -64,10 +67,14 @@ class DataResource(resource.Resource):
         request_msg = request.payload.decode()
 
         # Read data from database
-        data = db.read_data_from_db()
+        data = {
+            "data": self.db.read_all_data()
+        }
 
-        # Send the file data as payload
-        return aiocoap.Message(payload=str(data).encode(), code=aiocoap.CONTENT)
+        data_json = json.dumps(data)
+
+        # Send the file data as payload 
+        return aiocoap.Message(payload=str(data_json).encode(), code=aiocoap.CONTENT)
 
 class DeviceConfigResource(resource.Resource):
     """Resource to manage device configurations. It supports GET and PUT methods."""
@@ -82,7 +89,7 @@ class DeviceConfigResource(resource.Resource):
             device_id = request.payload.decode()
             self.logger.debug(f"Received device_id: {device_id}")
             device_config = self.db.read_device_config(device_id)
-            return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.JSON)
+            return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.JSON, code=aiocoap.CONTENT)
         except Exception as e:
             self.logger.error(f"Failed to get device config: {e}")
             return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
@@ -130,6 +137,27 @@ def write_temperature_to_file(temperature):
     f.close()
   
 async def main():
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Start the server.')
+    parser.add_argument('--ip', help='The IP address of the server.')
+    parser.add_argument('--port', type=int, help='The port number of the server.')
+    parser.add_argument('--output', '-o', help='The file to write the output to. If not specified, the output is written to stdout.')
+
+    # Parse the command-line arguments
+    args = parser.parse_args()
+
+    ip_address = DEFAULT_IP_ADRESS
+    port = DEFAULT_PORT
+
+    # Redirect the output to a file if specified
+    if args.output:
+        sys.stdout = open(args.output, 'w')
+        sys.stderr = open(args.output, 'w')
+    if args.ip:
+        ip_address = args.ip
+    if args.port:
+        port = args.port
+
     set_logger()
     logger = logging.getLogger("main")
 
@@ -146,24 +174,7 @@ async def main():
     root.add_resource(['data'], DataResource())
     root.add_resource(['device_config'], DeviceConfigResource())
 
-    ip_address = DEFAULT_IP_ADRESS
-    port = DEFAULT_PORT
-
-    logger.debug("parse command line arguments!")
-    for arg in sys.argv[1:]:
-        if "ip=" in arg:
-            try:
-                ip_address = arg[len("ip="):]
-                ipaddress.ip_address(ip_address)
-                logger.info(f"server ip={ip_address}")
-            except ValueError:
-                print('ip address is invalid: %s' % ip_address)
-                return
-        elif "port=" in arg:
-            port = int(arg[len("port="):])
-            logger.info(f"server port={arg}")
-        else:
-            print('Usage : %s  ip=<ip_address> port=<port>' % sys.argv[0])
+    logger.info(f"server ip={ip_address}, port={port}")
     
     await aiocoap.Context.create_server_context(root, bind=(ip_address, port))
 
