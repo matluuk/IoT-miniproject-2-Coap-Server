@@ -272,6 +272,14 @@ The temperature data is stored in files under data folder. One file is made for 
     tail -f ./<name-of-the-lates-data-file>.txt
     ```
 
+## Unittests
+
+### Coverage
+    With following command the unittest coverage report can be created.
+    ```bash
+    pytest --cov=. --cov-report=html tests/
+    ```
+
 ## Code Structure
 
 The project has the following code structure:

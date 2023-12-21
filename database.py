@@ -5,11 +5,11 @@ import logging
 # This class is used to create a SQLite database and write data to it
 
 class Database():
-    def __init__(self):
+    def __init__(self, db_file='sqlite_database.db'):
         self.logger = logging.getLogger('Database')
         self.conn = self.__create_connection()
 
-    def __create_connection(self):
+    def __create_connection(self, db_file='sqlite_database.db'):
         conn = None
         try:
             conn = sqlite3.connect('sqlite_database.db')  # Creates a SQLite database in the current directory
