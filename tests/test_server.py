@@ -21,8 +21,7 @@ class TestServer(unittest.TestCase):
         utils.set_logger()
         cls.logger = logging.getLogger('TestDatabase')
         # Start the server in a separate process
-        # cls.server_process = subprocess.Popen([VENV_PATH, '-m', 'server.main', 'ip=127.0.0.1'], stdout=f, stderr=f)
-        cls.server_process = multiprocessing.Process(target=server_main, args=('--output', 'server_output.out', '--ip', '127.0.0.1',))
+        # cls.server_process = multiprocessing.Process(target=server_main, args=('--output', 'server_output.out', '--ip', '127.0.0.1',))
 
         # Allow some time for the server to start
         time.sleep(1)
@@ -37,8 +36,9 @@ class TestServer(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         # Terminate the server process when the tests are done
-        cls.server_process.terminate()
-        cls.server_process.wait()
+        # cls.server_process.terminate()
+        # cls.server_process.wait()
+        pass
 
     def test_temperature_resource_put(self):
         # Arrange
