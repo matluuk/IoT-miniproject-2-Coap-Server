@@ -74,13 +74,13 @@ class DeviceConfigResource(resource.Resource):
 
     def __init__(self):
         super().__init__()
-        self.db = database.Database()  # Assuming you have a Database class in database.py
+        self.db = database.Database()
         self.logger = logging.getLogger('DeviceConfigResource')
 
     async def render_get(self, request):
         try:
             device_id = request.payload.decode()
-            device_config = self.db.read_device_config(device_id)  # Assuming you have a read_device_config method in your Database class
+            device_config = self.db.read_device_config(device_id)
             return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.JSON)
         except Exception as e:
             self.logger.error(f"Failed to get device config: {e}")
@@ -90,7 +90,7 @@ class DeviceConfigResource(resource.Resource):
         try:
             device_config = json.loads(request.payload.decode())
             self.logger.debug(f"Received device config: {device_config}")
-            self.db.update_device_config(device_config)  # Assuming you have an update_device_config method in your Database class
+            self.db.set_device_config(device_config) 
             return aiocoap.Message(code=aiocoap.CHANGED)
         except Exception as e:
             self.logger.error(f"Failed to update device config: {e}")

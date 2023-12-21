@@ -81,7 +81,27 @@ class Database():
         except Error as e:
             logger.error(e)
             raise
+
+    def set_device_config(self, device_config):
+        device_id = device_config['device_id']
+        existing_config = self.read_device_config(device_id)
+        if existing_config is not None:
+            self.update_device_config(device_config)
+        else:
+            self.add_device_config(device_config)
+
     
+    def add_device_config(self, device_config):
+        try:
+            with self.conn:
+                self.conn.execute("""
+                    INSERT INTO device_configs (device_id, active_mode, location_timeout, active_wait_timeout, passive_wait_timeout) 
+                    VALUES (:device_id, :active_mode, :location_timeout, :active_wait_timeout, :passive_wait_timeout)
+                """, device_config)
+        except Error as e:
+            print(e)
+
+
     def update_device_config(self, device_config):
         try:
             c = self.conn.cursor()
