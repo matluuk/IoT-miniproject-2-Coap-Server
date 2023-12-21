@@ -87,7 +87,7 @@ class Database():
 
     def set_device_config(self, device_config):
         device_id = device_config['device_id']
-        existing_config = self.read_device_config(device_id)
+        existing_config = self.checkIfDeviceExists(device_id)
         if existing_config is not None:
             self.logger.info(f"Updating device config for device_id: {device_id}")
             self.update_device_config(device_config)
@@ -137,6 +137,20 @@ class Database():
                 return None
             self.logger.info(f"Read device config for device_id: {device_id}")
             return dict(zip(columns, data))
+        except Error as e:
+            self.logger.error(f"Failed to read device config for device_id: {device_id}")
+            raise
+    
+    def check_if_device_config_exists(self, device_id):
+        try:
+            c = self.conn.cursor()
+            c.execute("SELECT * FROM device_configs WHERE device_id = ?", (device_id))
+            data = c.fetchone()
+            if data is None:
+                self.logger.info(f"No device config found for device_id: {device_id}")
+                return False
+            self.logger.info(f"Read device config for device_id: {device_id}")
+            return True
         except Error as e:
             self.logger.error(f"Failed to read device config for device_id: {device_id}")
             raise
