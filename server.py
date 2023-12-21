@@ -89,6 +89,7 @@ class DeviceConfigResource(resource.Resource):
     async def render_put(self, request):
         try:
             device_config = json.loads(request.payload.decode())
+            self.logger.debug(f"Received device config: {device_config}")
             self.db.update_device_config(device_config)  # Assuming you have an update_device_config method in your Database class
             return aiocoap.Message(code=aiocoap.CHANGED)
         except Exception as e:
@@ -132,10 +133,10 @@ async def main():
     logger = logging.getLogger("main")
 
     # Create an instance of the Database class
-    global db
     db = database.Database()
+    db.initialize_db()
 
-    # Resource tree creation
+    # Resource tree creationS
     root = resource.Site()
 
     root.add_resource(['.well-known', 'core'],

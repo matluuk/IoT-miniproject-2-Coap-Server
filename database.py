@@ -19,9 +19,18 @@ class Database():
             logger.error(e)
         return conn
 
-    def intialize_db(self):
-        self.create_device_configs_table()
-        self.create_data_table()
+    def initialize_db(self):
+        c = self.conn.cursor()
+
+        # Check if the 'device_configs' table exists
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='device_configs'")
+        if not c.fetchone():
+            self.create_device_configs_table()
+
+        # Check if the 'data' table exists
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='data'")
+        if not c.fetchone():
+            self.create_data_table()
 
     def create_data_table(self):
         try:
