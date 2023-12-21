@@ -17,6 +17,7 @@ class Database():
             logger.info(sqlite3.version)
         except Error as e:
             logger.error(e)
+            raise
         return conn
 
     def initialize_db(self):
@@ -43,6 +44,7 @@ class Database():
                     "accuracy REAL)")
         except Error as e:
             logger.error(e)
+            raise
     
     def create_device_configs_table(self):
         try:
@@ -56,6 +58,7 @@ class Database():
                       "PRIMARY KEY(device_id)")
         except Error as e:
             logger.error(e)
+            raise
 
     def write_data(self, data):
         try:
@@ -66,6 +69,7 @@ class Database():
                 """, data)
         except Error as e:
             logger.error(e)
+            raise
 
     def read_all_data(self):
         try:
@@ -76,6 +80,7 @@ class Database():
             return data
         except Error as e:
             logger.error(e)
+            raise
     
     def update_device_config(self, device_config):
         try:
@@ -91,6 +96,7 @@ class Database():
             self.conn.commit()
         except Error as e: 
             logger.error(e)
+            raise
 
     def read_device_config(self, device_id):
         try:
@@ -103,3 +109,4 @@ class Database():
             return dict(zip(columns, data))
         except Error as e:
             logger.error(e)
+            raise
