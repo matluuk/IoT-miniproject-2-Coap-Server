@@ -81,7 +81,7 @@ class DeviceConfigResource(resource.Resource):
         try:
             device_id = request.payload.decode()
             device_config = self.db.read_device_config(device_id)  # Assuming you have a read_device_config method in your Database class
-            return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.APPLICATION_JSON)
+            return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.JSON)
         except Exception as e:
             self.logger.error(f"Failed to get device config: {e}")
             return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
