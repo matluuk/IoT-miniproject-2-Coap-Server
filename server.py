@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 import ipaddress
+import database
+import json
 
 import asyncio
 
@@ -11,8 +13,6 @@ from aiocoap.numbers.contentformat import ContentFormat
 import aiocoap
 
 from pathlib import Path
-
-import database
 
 DEFAULT_IP_ADRESS = "10.166.0.2"
 DEFAULT_PORT = 5683
@@ -68,6 +68,32 @@ class DataResource(resource.Resource):
 
         # Send the file data as payload
         return aiocoap.Message(payload=str(data).encode(), code=aiocoap.CONTENT)
+
+class DeviceConfigResource(resource.Resource):
+    """Resource to manage device configurations. It supports GET and PUT methods."""
+
+    def __init__(self):
+        super().__init__()
+        self.db = database.Database()  # Assuming you have a Database class in database.py
+        self.logger = logging.getLogger('DeviceConfigResource')
+
+    async def render_get(self, request):
+        try:
+            device_id = request.payload.decode()
+            device_config = self.db.read_device_config(device_id)  # Assuming you have a read_device_config method in your Database class
+            return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.APPLICATION_JSON)
+        except Exception as e:
+            self.logger.error(f"Failed to get device config: {e}")
+            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
+
+    async def render_put(self, request):
+        try:
+            device_config = json.loads(request.payload.decode())
+            self.db.update_device_config(device_config)  # Assuming you have an update_device_config method in your Database class
+            return aiocoap.Message(code=aiocoap.CHANGED)
+        except Exception as e:
+            self.logger.error(f"Failed to update device config: {e}")
+            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
 
 def set_logger():
     logs_dir = os.path.join(Path(__file__).resolve().parent, "logs")
