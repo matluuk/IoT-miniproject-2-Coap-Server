@@ -129,7 +129,7 @@ class Database():
     def read_device_config(self, device_id):
         try:
             c = self.conn.cursor()
-            c.execute("SELECT * FROM device_configs WHERE device_id = ?", (device_id))
+            c.execute("SELECT * FROM device_configs WHERE device_id = ?", (device_id,))
             columns = [column[0] for column in c.description]
             data = c.fetchone()
             if data is None:
@@ -144,7 +144,7 @@ class Database():
     def check_if_device_config_exists(self, device_id):
         try:
             c = self.conn.cursor()
-            c.execute("SELECT * FROM device_configs WHERE device_id = ?", (device_id))
+            c.execute("SELECT * FROM device_configs WHERE device_id = ?", (device_id,))
             data = c.fetchone()
             if data is None:
                 self.logger.info(f"No device config found for device_id: {device_id}")
