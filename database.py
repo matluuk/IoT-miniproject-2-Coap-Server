@@ -138,7 +138,7 @@ class Database():
             self.logger.info(f"Read device config for device_id: {device_id}")
             return dict(zip(columns, data))
         except Error as e:
-            self.logger.error(f"Failed to read device config for device_id: {device_id}")
+            self.logger.error(f"Failed to read device config for device_id {device_id}: {e}")
             raise
     
     def check_if_device_config_exists(self, device_id):
@@ -152,5 +152,5 @@ class Database():
             self.logger.info(f"Read device config for device_id: {device_id}")
             return True
         except Error as e:
-            self.logger.error(f"Failed to read device config for device_id: {device_id}")
+            self.logger.error(f"Failed to read device config for device_id {device_id}: {e}")
             raise
