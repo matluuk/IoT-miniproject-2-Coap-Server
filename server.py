@@ -141,7 +141,8 @@ async def main():
     root.add_resource(['.well-known', 'core'],
             resource.WKCResource(root.get_resources_as_linkheader))
     root.add_resource(['temperature'], TemperatureResource())
-    root.add_resource(['temperature'], DataResource())
+    root.add_resource(['data'], DataResource())
+    root.add_resource(['device_config'], DeviceConfigResource())
 
     ip_address = DEFAULT_IP_ADRESS
     port = DEFAULT_PORT
