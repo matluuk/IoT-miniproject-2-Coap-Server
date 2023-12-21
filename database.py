@@ -87,8 +87,7 @@ class Database():
 
     def set_device_config(self, device_config):
         device_id = device_config['device_id']
-        existing_config = self.check_if_device_config_exists(device_id)
-        if existing_config is not None:
+        if self.check_if_device_config_exists(device_id):
             self.logger.info(f"Updating device config for device_id: {device_id}")
             self.update_device_config(device_config)
         else:
