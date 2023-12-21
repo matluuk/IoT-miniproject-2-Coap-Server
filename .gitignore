@@ -9,4 +9,5 @@ htmlcov/
 .vscode
 tests/test_logs/
 tests/__pycache__/
+.coverage
 ```
