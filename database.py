@@ -7,12 +7,12 @@ import logging
 class Database():
     def __init__(self, db_file='sqlite_database.db'):
         self.logger = logging.getLogger('Database')
-        self.conn = self.__create_connection()
+        self.conn = self.__create_connection(db_file=db_file)
 
     def __create_connection(self, db_file='sqlite_database.db'):
         conn = None
         try:
-            conn = sqlite3.connect('sqlite_database.db')  # Creates a SQLite database in the current directory
+            conn = sqlite3.connect(db_file)  # Creates a SQLite database in the current directory
             self.logger.info(f"Connected to database with sqlite version {sqlite3.version}")
         except Error as e:
             self.logger.error(f"Failed to connect to database: {e}")
