@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+    <div id="mapid" style="height: 600px;"></div>
+    <input type="range" min="1" max="50" value="1" id="locationSlider" oninput="updateSliderValue(this.value)">
+    <span id="sliderValue">1</span>
+    <button id="updateButton">Update View</button>
+
+    <script>
+        var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+
+        // Assign the tile layer to a variable
+        var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(mymap);
+
+        var marker = L.marker([51.5, -0.09]).addTo(mymap);
+
+        // Add a scale to the bottom left corner of the map
+        L.control.scale().addTo(mymap);
+
+        // Function to fetch data from the Flask API and update the map view
+        function updateView() {
+            fetch('http://localhost:5000/api/data')
+                .then(response => response.json())
+                .then(json => {
+                    // Get the number of locations to display from the slider
+                    var numLocations = document.getElementById('locationSlider').value;
+
+                    // Ensure numLocations is not greater than the length of the data array
+                    numLocations = Math.min(numLocations, json.data.length);
+
+                    // Get the last numLocations data points
+                    var dataPoints = json.data.slice(-numLocations);
+
+                    // Remove all existing markers
+                    mymap.eachLayer(function (layer) {
+                        if (layer != tileLayer) {  // Don't remove the tile layer
+                            mymap.removeLayer(layer);
+                        }
+                    });
+
+                    // Add a new marker and a circle for each data point
+                    dataPoints.forEach(function (data, index) {
+                        var opacity = (index + 1) / dataPoints.length;  // Calculate the opacity based on the index
+                        var marker = L.marker([data.latitude, data.longitude], { opacity: opacity }).addTo(mymap);
+
+                        // Add a circle around the marker with a radius proportional to the accuracy
+                        var circle = L.circle([data.latitude, data.longitude], {
+                            color: 'red',
+                            fillColor: '#f03',
+                            fillOpacity: 0.5,
+                            radius: data.accuracy
+                        }).addTo(mymap);
+                    });
+
+                    // Calculate the geographical center of all the displayed points
+                    var latSum = 0, lngSum = 0;
+                    dataPoints.forEach(function (data) {
+                        latSum += data.latitude;
+                        lngSum += data.longitude;
+                    });
+                    var centerLat = latSum / dataPoints.length;
+                    var centerLng = lngSum / dataPoints.length;
+
+                    // Update the map's view to the center of all displayed points
+                    mymap.setView([centerLat, centerLng], 13);
+
+                    // Create an array to hold the coordinates of all data points
+                    var coordinates = dataPoints.map(function (data) {
+                        return [data.latitude, data.longitude];
+                    });
+
+                    // Adjust the map's view to fit the bounds of the coordinates
+                    mymap.fitBounds(coordinates, { maxZoom: 13 });
+                });
+        }
+
+        function updateSliderValue(value) {
+            document.getElementById('sliderValue').textContent = value;
+        }
+
+        // Add event listener to the button
+        document.getElementById('updateButton').addEventListener('click', updateView);
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+15:45:10,672 root DEBUG Logger set up
+15:45:10,673 TestDatabase INFO Testing test_connect_to_existing_database
+15:45:10,673 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,674 Database INFO Creating 'device_configs' table
+15:45:10,679 Database INFO Creating 'data' table
+15:45:10,684 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,689 TestDatabase INFO Testing test_create_data_table
+15:45:10,689 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,689 Database INFO Creating 'device_configs' table
+15:45:10,695 Database INFO Creating 'data' table
+15:45:10,700 Database ERROR Failed to create 'data' table: table data already exists
+15:45:10,702 TestDatabase INFO Testing create_connection
+15:45:10,703 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,704 Database INFO Creating 'device_configs' table
+15:45:10,712 Database INFO Creating 'data' table
+15:45:10,721 TestDatabase INFO Testing test_create_device_configs_table
+15:45:10,721 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,722 Database INFO Creating 'device_configs' table
+15:45:10,728 Database INFO Creating 'data' table
+15:45:10,733 Database ERROR Failed to create 'device_config' table: table device_configs already exists
+15:45:10,736 TestDatabase INFO Testing test_read_all_data
+15:45:10,736 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,737 Database INFO Creating 'device_configs' table
+15:45:10,743 Database INFO Creating 'data' table
+15:45:10,749 Database INFO Read all data successfully
+15:45:10,752 TestDatabase INFO Testing test_read_empty_device_config
+15:45:10,752 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,753 Database INFO Creating 'device_configs' table
+15:45:10,760 Database INFO Creating 'data' table
+15:45:10,766 Database INFO No device config found for device_id: 123
+15:45:10,768 TestDatabase INFO Testing test_set_and_read_device_config
+15:45:10,770 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,771 Database INFO Creating 'device_configs' table
+15:45:10,777 Database INFO Creating 'data' table
+15:45:10,782 Database INFO No device config found for device_id: 1234
+15:45:10,782 Database INFO Adding new device config for device_id: 1234
+15:45:10,786 Database INFO Added new device config for device_id: 1234
+15:45:10,787 Database INFO Read device config for device_id: 1234
+15:45:10,790 TestDatabase INFO Testing test_set_device_config
+15:45:10,790 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,791 Database INFO Creating 'device_configs' table
+15:45:10,800 Database INFO Creating 'data' table
+15:45:10,806 Database INFO No device config found for device_id: test_device
+15:45:10,806 Database INFO Adding new device config for device_id: test_device
+15:45:10,811 Database INFO Added new device config for device_id: test_device
+15:45:10,811 Database INFO Read device config for device_id: test_device
+15:45:10,812 Database INFO Read device config for device_id: test_device
+15:45:10,812 Database INFO Updating device config for device_id: test_device
+15:45:10,816 Database INFO Updated device config for device_id: test_device
+15:45:10,816 Database INFO Read device config for device_id: test_device
+15:45:10,818 TestDatabase INFO Testing test_write_and_read_data
+15:45:10,819 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,819 Database INFO Creating 'device_configs' table
+15:45:10,826 Database INFO Creating 'data' table
+15:45:10,834 Database INFO Write data successfully to 'data' table
+15:45:10,835 Database INFO Read all data successfully
+15:45:10,837 TestDatabase INFO Testing test_write_data
+15:45:10,838 Database INFO Connected to database with sqlite version 2.6.0
+15:45:10,839 Database INFO Creating 'device_configs' table
+15:45:10,850 Database INFO Creating 'data' table
+15:45:10,867 Database INFO Write data successfully to 'data' table
