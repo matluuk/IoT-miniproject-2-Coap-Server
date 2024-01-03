@@ -77,6 +77,49 @@ class TestServer(unittest.TestCase):
         self.logger.debug(f'response_data: {response_data["data"]}')
         self.assertEqual(response_data["data"][-1], data)
     
+    def test_multiple_data_resource(self):
+        locations = [
+            {"time": "2021-05-01 13:00:00", "latitude": 12.345, "longitude": 67.890, "altitude": 123.456, "accuracy": 10.345},
+            {"time": "2021-05-01 13:01:00", "latitude": 13.345, "longitude": 68.890, "altitude": 124.456, "accuracy": 20.345},
+            {"time": "2021-05-01 13:02:00", "latitude": 14.345, "longitude": 69.890, "altitude": 125.456, "accuracy": 30.345},
+            {"time": "2021-05-01 13:03:00", "latitude": 15.345, "longitude": 70.890, "altitude": 126.456, "accuracy": 40.345},
+            {"time": "2021-05-01 13:04:00", "latitude": 16.345, "longitude": 71.890, "altitude": 127.456, "accuracy": 50.345},
+            {"time": "2021-05-01 13:05:00", "latitude": 17.345, "longitude": 72.890, "altitude": 128.456, "accuracy": 60.345},
+            {"time": "2021-05-01 13:06:00", "latitude": 18.345, "longitude": 73.890, "altitude": 129.456, "accuracy": 70.345},
+            {"time": "2021-05-01 13:07:00", "latitude": 19.345, "longitude": 74.890, "altitude": 130.456, "accuracy": 80.345},
+            {"time": "2021-05-01 13:08:00", "latitude": 20.345, "longitude": 75.890, "altitude": 131.456, "accuracy": 90.345},
+            {"time": "2021-05-01 13:09:00", "latitude": 21.345, "longitude": 76.890, "altitude": 132.456, "accuracy": 100.345}
+        ]
+
+        for location in locations:
+            data_json = json.dumps(location)
+            payload = data_json.encode()
+
+            # Arrange
+            request = Message(code=POST, payload=payload, uri="coap://localhost/data")
+
+            # Act
+            response = self.loop.run_until_complete(self.context.request(request).response)
+
+            # Assert
+            self.assertEqual(response.code, CHANGED)
+
+        # Arrange
+        request = Message(code=GET, uri="coap://localhost/data")
+
+        # Act
+        response = self.loop.run_until_complete(self.context.request(request).response)
+
+        # Assert
+        self.assertEqual(response.code, CONTENT)
+
+        response_json = response.payload.decode()
+        response_data = json.loads(response_json)
+
+        # Assert that the last 10 data points are the locations
+        for i, location in enumerate(locations):
+            self.assertEqual(response_data["data"][-10 + i], location)
+    
     def test_device_config_resource(self):
         device_config_json = '{"device_id": "test_device_id", "active_mode": true, "location_timeout": 10, "active_wait_timeout": 10, "passive_wait_timeout": 10}'
         device_config = json.loads(device_config_json)
