@@ -45,7 +45,7 @@ class DataResource(resource.Resource):
         super().__init__()
         self.set_content(0)
         self.db = database.Database()
-        self.logger = logging.getLogger('TemperatureResource')
+        self.logger = logging.getLogger('DataResource')
 
     def set_content(self, content):
         self.content = content
