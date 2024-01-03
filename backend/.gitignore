@@ -1,0 +1,12 @@
+logs/
+data/
+*.log
+save_pid.txt
+sqlite_database.db
+__pycache__/
+htmlcov/
+.vscode
+tests/test_logs/
+tests/__pycache__/
+.coverage
+```

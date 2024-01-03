@@ -1,13 +1,3 @@
 venv/
-logs/
-data/
-*.log
-save_pid.txt
-sqlite_database.db
+.vscode/
 __pycache__/
-htmlcov/
-.vscode
-tests/test_logs/
-tests/__pycache__/
-.coverage
-```
