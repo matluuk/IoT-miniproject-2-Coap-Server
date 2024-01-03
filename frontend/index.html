@@ -47,43 +47,18 @@
         background-color: #bcbcbc;
     }
 
-    input[type=range] {
-        width: 100%;
-        height: 25px;
-        background: #d3d3d3;
-        outline: none;
-        opacity: 0.7;
-        transition: opacity .2s;
-    }
-
-    input[type=range]:hover {
-        opacity: 1;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-        width: 25px;
-        height: 25px;
-        background: #4CAF50;
-        cursor: pointer;
-        appearance: none;
-    }
-
-    input[type=range]::-moz-range-thumb {
-        width: 25px;
-        height: 25px;
-        background: #4CAF50;
-        cursor: pointer;
-    }
+    #locationList li.selected {
+            background-color: #90aac1;
+        }
     </style>
 
     <div id="mapid" style="height: 600px;"></div>
-    <input type="range" min="1" max="50" value="1" id="locationSlider" oninput="updateSliderValue(this.value)">
-    <span id="sliderValue">1</span>
-    <button id="updateButton">Update View</button>
     <hr>
     <input type="datetime-local" id="startTime">
     <input type="datetime-local" id="endTime">
     <button id="filterButton" onclick="filterLocations()">Filter Locations</button>
+    <button id="resetButton" onclick="resetLocations()">Reset</button>
+    <button id="centerViewButton" onclick="centerView()">Center View</button>
     <div id="locationList"></div>
 
     <script>
@@ -101,9 +76,14 @@
 
         // Define dataPoints as a global variable
         var dataPoints = [];
+        
+        // Define markers as a global variable
+        var markers = [];
 
         // Global variable to store the currently selected marker
         var selectedMarker = null;
+
+        var selectedDataPoints = [];
 
         // Create a red marker icon
         var redMarker = L.AwesomeMarkers.icon({
@@ -119,7 +99,7 @@
 
         // Fetch the data when the page loads
         window.onload = function() {
-            fetchData();
+            fetchData().then(centerView);
 
             // Fetch the data every 5 minutes
             setInterval(fetchData, 300000);
@@ -127,29 +107,35 @@
 
         // Function to fetch data from the Flask API
         function fetchData() {
-            fetch('http://localhost:5000/api/data')
-                .then(response => response.json())
-                .then(json => {
-                    // Update the global dataPoints variable with the fetched data
-                    dataPoints = json.data;
+            return new Promise((resolve, reject) => {
+                fetch('http://localhost:5000/api/data')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(json => {
+                        console.log('Fetched data:', json);  // Log the fetched data
 
-                    // Update the location data list
-                    updateView();
-                    filterLocations();
-                });
+                        // Update the global dataPoints variable with the fetched data
+                        dataPoints = json.data;
+
+                        // Update the location data list
+                        updateLocationList();
+                        updateMap();
+
+                        resolve();  // Resolve the Promise
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);  // Log any errors
+                        reject(error);  // Reject the Promise if there's an error
+                    });
+            });
         }
 
         // Function to update the map view
-        function updateView() {
-            // Get the number of locations to display from the slider
-            var numLocations = document.getElementById('locationSlider').value;
-
-            // Ensure numLocations is not greater than the length of the data array
-            numLocations = Math.min(numLocations, dataPoints.length);
-
-            // Get the last numLocations data points
-            var selectedDataPoints = dataPoints.slice(-numLocations);
-
+        function updateMap() {
             // Remove all existing markers
             mymap.eachLayer(function (layer) {
                 if (layer != tileLayer) {  // Don't remove the tile layer
@@ -161,6 +147,7 @@
             selectedDataPoints.forEach(function (data, index) {
                 var opacity = (index + 1) / selectedDataPoints.length;  // Calculate the opacity based on the index
                 var marker = L.marker([data.latitude, data.longitude], { icon: blueMarker, opacity: opacity }).addTo(mymap);
+                markers.push(marker);  // Store the marker in the array
 
                 // Add a circle around the marker with a radius proportional to the accuracy
                 var circle = L.circle([data.latitude, data.longitude], {
@@ -170,7 +157,10 @@
                     radius: data.accuracy
                 }).addTo(mymap);
             });
+        }
 
+        // function to zoom the map view to selected locations
+        function centerView() {
             // Calculate the geographical center of all the displayed points
             var latSum = 0, lngSum = 0;
             selectedDataPoints.forEach(function (data) {
@@ -192,21 +182,16 @@
             mymap.fitBounds(coordinates, { maxZoom: 13 });
         }
 
-        function updateSliderValue(value) {
-            document.getElementById('sliderValue').textContent = value;
-        }
-
-        // Function to filter locations and update the list
-        function filterLocations() {
+        function updateLocationList() {
             // Get the start and end times
             var startTime = new Date(document.getElementById('startTime').value);
             var endTime = new Date(document.getElementById('endTime').value);
 
             // If the start and end times are not valid dates, use all data points
-            var filteredDataPoints = dataPoints;
+            selectedDataPoints = dataPoints;
             if (!isNaN(startTime) && !isNaN(endTime)) {
                 // Filter the data points
-                filteredDataPoints = dataPoints.filter(function (data) {
+                selectedDataPoints = dataPoints.filter(function (data) {
                     var dataTime = new Date(Date.parse(data.time.replace(' ', 'T')));
                     return dataTime >= startTime && dataTime <= endTime;
                 });
@@ -215,35 +200,62 @@
             // Update the list
             var locationList = document.getElementById('locationList');
             locationList.innerHTML = '';  // Clear the existing list
-            filteredDataPoints.forEach(function (data, index) {
+            selectedDataPoints.forEach(function (data, index) {
                 var listItem = document.createElement('li');
                 listItem.textContent = 'Time: ' + data.time + ', Latitude: ' + data.latitude + ', Longitude: ' + data.longitude + ', Accuracy: ' + data.accuracy;
 
-                // Create a marker for the location point with the blue marker icon
-                var marker = L.marker([data.latitude, data.longitude], {icon: blueMarker}).addTo(mymap);
-
                 // Add a click event listener to move the map to the location point and change the color of the marker when the list item is clicked
                 listItem.addEventListener('click', function () {
-                    mymap.setView([data.latitude, data.longitude], 13);
-
                     // If there is a previously selected marker, change its icon back to the blue marker icon
                     if (selectedMarker) {
                         selectedMarker.setIcon(blueMarker);
                     }
 
                     // Change the icon of the selected marker to the red marker icon
-                    marker.setIcon(redMarker);
+                    markers[index].setIcon(redMarker);  // Use the correct marker from the array
 
                     // Update the currently selected marker
-                    selectedMarker = marker;
-                });
+                    selectedMarker = markers[index];  // Use the correct marker from the array
 
+                    // Get the current visible area of the map
+                    var bounds = mymap.getBounds();
+
+                    // Check if the selected marker's position is within the visible area
+                    if (!bounds.contains(selectedMarker.getLatLng())) {
+                        // If not, move the map to the selected marker's position
+                        mymap.setView(selectedMarker.getLatLng(), 13);
+                    }
+
+                    // Change the background color of the selected list item
+                    var selectedListItem = document.querySelector('#locationList li.selected');
+                    if (selectedListItem) {
+                        selectedListItem.classList.remove('selected');
+                    }
+                    listItem.classList.add('selected');
+                });
                 locationList.appendChild(listItem);
             });
         }
 
+        // Function to filter locations and update the list
+        function filterLocations() {
+            updateLocationList();
+            updateMap();
+            centerView();
+        }
+
+        // Function to reset locations and update the list
+        function resetLocations() {
+            // Clear the start and end times
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
+
+            // Update the list and the map view with all the data points
+            updateMap(dataPoints);
+        }
+
         // Add event listener to the button
-        document.getElementById('updateButton').addEventListener('click', updateView);
+        document.getElementById('updateButton').addEventListener('click', updateMap);
     </script>
 </body>
 </html>
