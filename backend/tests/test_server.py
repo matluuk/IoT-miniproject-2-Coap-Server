@@ -51,7 +51,7 @@ class TestServer(unittest.TestCase):
         self.assertEqual(response.code, CHANGED)
 
     def test_data_resource(self):
-        data_json = '{"time": "2021-05-01 13:00:00", "latitude": 12.345, "longitude": 67.890, "altitude": 123.456, "accuracy": 12.345}'
+        data_json = '{"time": "2021-05-01 13:00:00", "latitude": 30.345, "longitude": 80.890, "altitude": 123.456, "accuracy": 12.345}'
         data = json.loads(data_json)
         payload = data_json.encode()
         # Arrange
