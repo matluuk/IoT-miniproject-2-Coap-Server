@@ -204,6 +204,16 @@ Connect to the linux VM, where you want the the CoAp server to be deployed.
         ```bash
         pip3 install --upgrade "aiocoap[all]"
         ```
+
+6. Install flask
+    * install flask
+        ```bash
+        pip3 install flask
+        ```
+    * install flask-cors
+        ```bash
+        pip3 install flask-cors
+        ```
 ### Start CoAp server
 
 1. Check the external ipv6 address for your VM.
@@ -270,6 +280,10 @@ The temperature data is stored in files under data folder. One file is made for 
 2. The temperature data can be shown using the `tail` command.
     ```bash
     tail -f ./<name-of-the-lates-data-file>.txt
+    ```
+    Or the latest file can be shown using this command:
+    ```bash
+    tail -f `ls -t | head -1`
     ```
 
 ## Unittests
