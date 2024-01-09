@@ -76,6 +76,31 @@ class TestServer(unittest.TestCase):
         response_data = json.loads(response_json)
         self.logger.debug(f'response_data: {response_data["data"]}')
         self.assertEqual(response_data["data"][-1], data)
+
+    def test_data_resource_non_json_payload(self):
+        payload = b"This is a non-JSON payload"
+        # Arrange
+        request = Message(code=POST, payload=payload, uri="coap://localhost/data")
+
+        # Act
+        response = self.loop.run_until_complete(self.context.request(request).response)
+
+        # Assert
+        # Expecting a 4.00 Bad Request response because the payload is not JSON
+        self.assertEqual(response.code, aiocoap.BAD_REQUEST)
+
+    def test_data_resource_incomplete_json_payload(self):
+        data_json = '{"time": "2021-05-01 13:00:00", "latitude": 30.345, "longitude": 80.890}'
+        payload = data_json.encode()
+        # Arrange
+        request = Message(code=POST, payload=payload, uri="coap://localhost/data")
+
+        # Act
+        response = self.loop.run_until_complete(self.context.request(request).response)
+
+        # Assert
+        # Expecting a 4.00 Bad Request response because the payload is missing some fields
+        self.assertEqual(response.code, aiocoap.BAD_REQUEST)
     
     def test_multiple_data_resource(self):
         locations = [

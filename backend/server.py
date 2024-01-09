@@ -51,30 +51,44 @@ class DataResource(resource.Resource):
         self.content = content
 
     async def render_post(self, request):
-        print('POST payload: %s' % request.payload)
-        self.logger.info('POST payload: %s' % request.payload)
-        self.set_content(request.payload)
-        data_json = request.payload.decode()
-        data = json.loads(data_json)
-        self.db.write_data(data)
-        
-        return aiocoap.Message(code=aiocoap.CHANGED)
+        try:
+            data_json = request.payload.decode()
+            data = json.loads(data_json)
+            
+            # Check for required fields
+            required_fields = ["time", "latitude", "longitude", "altitude", "accuracy"]
+            if not all(field in data for field in required_fields):
+                return aiocoap.Message(code=aiocoap.BAD_REQUEST)
+
+            self.db.write_data(data)
+            return aiocoap.Message(code=aiocoap.CHANGED, token=request.token)
+        except json.JSONDecodeError:
+            # Return a "4.00 Bad Request" response if the payload is not valid JSON
+            return aiocoap.Message(code=aiocoap.BAD_REQUEST)
+        except Exception as e:
+            print(f"An error occurred in render_post: {e}")
+            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
 
     async def render_get(self, request):
-        print('GET payload: %s' % request.payload)
-        self.logger.info('GET payload: %s' % request.payload)
-        self.set_content(request.payload)
-        request_msg = request.payload.decode()
+        try:
+            msg = f"GET token: {request.token} payload: {request.payload}"
+            print(msg)
+            self.logger.info(msg)
+            self.set_content(request.payload)
+            request_msg = request.payload.decode()
 
-        # Read data from database
-        data = {
-            "data": self.db.read_all_data()
-        }
+            # Read data from database
+            data = {
+                "data": self.db.read_all_data()
+            }
 
-        data_json = json.dumps(data)
+            data_json = json.dumps(data)
 
-        # Send the file data as payload 
-        return aiocoap.Message(payload=str(data_json).encode(), code=aiocoap.CONTENT)
+            # Send the file data as payload 
+            return aiocoap.Message(payload=str(data_json).encode(), code=aiocoap.CONTENT, token=request.token)
+        except Exception as e:
+            print(f"An error occurred in render_get: {e}")
+            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
 
 class DeviceConfigResource(resource.Resource):
     """Resource to manage device configurations. It supports GET and PUT methods."""
@@ -85,6 +99,9 @@ class DeviceConfigResource(resource.Resource):
         self.logger = logging.getLogger('DeviceConfigResource')
 
     async def render_get(self, request):
+        msg = f"GET token: {request.token} payload: {request.payload}"
+        print(msg)
+        self.logger.info(msg)
         try:
             device_id = request.payload.decode()
             self.logger.debug(f"Received device_id: {device_id}")
@@ -92,17 +109,20 @@ class DeviceConfigResource(resource.Resource):
             return aiocoap.Message(payload=json.dumps(device_config).encode(), content_format=ContentFormat.JSON, code=aiocoap.CONTENT)
         except Exception as e:
             self.logger.error(f"Failed to get device config: {e}")
-            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
+            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR, token=request.token)
 
     async def render_put(self, request):
+        msg = f"PUT token: {request.token} payload: {request.payload}"
+        print(msg)
+        self.logger.info(msg)
         try:
             device_config = json.loads(request.payload.decode())
             self.logger.debug(f"Received device config: {device_config}")
             self.db.set_device_config(device_config) 
-            return aiocoap.Message(code=aiocoap.CHANGED)
+            return aiocoap.Message(code=aiocoap.CHANGED, token=request.token)
         except Exception as e:
             self.logger.error(f"Failed to update device config: {e}")
-            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR)
+            return aiocoap.Message(code=aiocoap.INTERNAL_SERVER_ERROR, token=request.token)
 
 def set_logger():
     logs_dir = os.path.join(Path(__file__).resolve().parent, "logs")
