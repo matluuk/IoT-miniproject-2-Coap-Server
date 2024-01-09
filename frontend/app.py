@@ -81,4 +81,4 @@ def get_data():
 
 if __name__ == '__main__':
     parse_args()
-    app.run(debug=True, host=ip_address, port=port)
+    app.run(debug=False, host=ip_address, port=port)
