@@ -117,7 +117,7 @@ def config():
         coap_request = Message(code=PUT, uri=coap_server_url, payload=json.dumps(data))
 
         # Send the request
-        response = await protocol.request(request).response
+        response = await protocol.request(coap_request).response
 
         # Return the response status code
         return str(response.code)
