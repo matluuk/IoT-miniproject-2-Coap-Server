@@ -22,44 +22,73 @@
             cursor: pointer;
             transition-duration: 0.4s;
         }
-    
-    button:hover {
-        background-color: #45a049;
-    }
+        
+        button:hover {
+            background-color: #45a049;
+        }
 
-    #locationList {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        font-size: 14px;
-    }
+        #locationList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            font-size: 14px;
+        }
 
-    #locationList li {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-    }
+        #locationList li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
 
-    #locationList li:last-child {
-        border-bottom: none;
-    }
+        #locationList li:last-child {
+            border-bottom: none;
+        }
 
-    #locationList li:hover {
-        background-color: #bcbcbc;
-    }
+        #locationList li:hover {
+            background-color: #bcbcbc;
+        }
 
-    #locationList li.selected {
+        #locationList li.selected {
             background-color: #90aac1;
+        }
+        
+        .left-panel
+        {        
+            width:50%;
+            height:100px;
+            float:left;        
+        }
+        .right-panel
+        {        
+            width:50%;
+            height:100px;
+            float:right;
         }
     </style>
 
     <div id="mapid" style="height: 600px;"></div>
     <hr>
-    <input type="datetime-local" id="startTime">
-    <input type="datetime-local" id="endTime">
-    <button id="filterButton" onclick="filterLocations()">Filter Locations</button>
     <button id="resetButton" onclick="resetLocations()">Reset</button>
     <button id="centerViewButton" onclick="centerView()">Center View</button>
-    <div id="locationList"></div>
+    <hr>
+    <div class="left-panel">
+        <input type="datetime-local" id="startTime">
+        <input type="datetime-local" id="endTime">
+        <button id="filterButton" onclick="filterLocations()">Filter Locations</button>
+        <div id="locationList"></div>
+    </div>
+    <div class="right-panel">
+        <h1>Device config</h1>
+        active_mode
+        <input type="number" id ="active_mode"><br>
+        location_timeout
+        <input type="number" id ="location_timeout"><br>
+        active_wait_timeout
+        <input type="number" id ="active_wait_timeout"><br>
+        passive_wait_timeout
+        <input type="number" id ="passive_wait_timeout"><br>
+        <button id="updateConfig" onclick="updateConfig()">Update Config</button>
+        <button id="getConfig" onclick="getConfig()">Get Config</button>
+    </div>
 
     <script>
         var mymap = L.map('mapid').setView([51.505, -0.09], 13);
@@ -99,7 +128,8 @@
 
         // Fetch the data when the page loads
         window.onload = function() {
-            setDatetimeDefaults()
+            setDatetimeDefaults();
+            getConfig();
             fetchData().then(centerView);
 
             // Fetch the data every 5 minutes
@@ -121,7 +151,8 @@
         // Function to fetch data from the Flask API
         function fetchData() {
             return new Promise((resolve, reject) => {
-                fetch('http://34.88.232.103:5000/api/data')
+                // fetch('http://34.88.232.103:5000/api/data')
+                fetch('http://localhost:5000/api/data')
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -277,6 +308,92 @@
 
             // Update the list and the map view with all the data points
             updateMap(dataPoints);
+        }
+
+        function getConfig() {
+            return new Promise((resolve, reject) => {
+                // fetch('http://34.88.232.103:5000/api/config')
+                fetch('http://localhost:5000/api/config')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(json => {
+                    console.log('Fetched data:', json);  // Log the fetched data
+
+                    // Update the global dataPoints variable with the fetched data
+                    document.getElementById('active_mode').value = json.active_mode;
+                    document.getElementById('location_timeout').value = json.location_timeout;
+                    document.getElementById('active_wait_timeout').value = json.active_wait_timeout;
+                    document.getElementById('passive_wait_timeout').value = json.passive_wait_timeout;
+
+                    // Update the location data list
+                    updateLocationList();
+                    updateMap();
+
+                    resolve();  // Resolve the Promise
+                })
+                .catch(error => {
+                    console.error('Error:', error);  // Log any errors
+                    reject(error);  // Reject the Promise if there's an error
+                });
+                // fetch('http://example.com/api', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify({
+                //         key1: 'value1',
+                //         key2: 'value2'
+                //     })
+                //     })
+                //     .then(response => response.json())
+                //     .then(data => console.log(data))
+                //     .catch(error => console.error(error))
+
+            });
+        }
+
+        function updateConfig() {
+            active_mode = document.getElementById('active_mode').value
+            location_timeout = document.getElementById('location_timeout').value
+            active_wait_timeout = document.getElementById('active_wait_timeout').value
+            passive_wait_timeout = document.getElementById('passive_wait_timeout').value
+            data = {
+                "device_id": "",
+                "active_mode": active_mode,
+                "location_timeout": location_timeout,
+                "active_wait_timeout": active_wait_timeout,
+                "passive_wait_timeout": passive_wait_timeout
+                }
+            // (async () => {
+            // const rawResponse = await fetch('http://34.88.232.103:5000/api/config', {
+            //     method: 'PUT',
+            //     headers: {
+            //     'Accept': 'application/json',
+            //     'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify(data)
+            // });
+            // const content = await rawResponse.json();
+
+            // console.log(content);
+            // })();
+
+            // fetch('http://34.88.232.103:5000/api/config', {
+            fetch('http://localhost:5000/api/config', {
+                method: 'PUT',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+                })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error))
         }
 
         // Add event listener to the button
