@@ -84,7 +84,7 @@ def get_data():
 def config():
     async def handle_get():
         # Replace with your CoAP server's address
-        coap_server_url = f'coap://{server_ip_address}:{server_port}/config'
+        coap_server_url = f'coap://{server_ip_address}:{server_port}/device_config'
         
         # Create a new CoAP client
         protocol = await Context.create_client_context()
@@ -105,16 +105,17 @@ def config():
     
     async def handle_put():
         # Replace with your CoAP server's address
-        coap_server_url = f'coap://{server_ip_address}:{server_port}/config'
+        coap_server_url = f'coap://{server_ip_address}:{server_port}/device_config'
         
         # Create a new CoAP client
         protocol = await Context.create_client_context()
 
         # Get the JSON data from the request
         data = request.get_json()
+        data_str = json.dumps(data)
 
         # Create a new PUT request
-        coap_request = Message(code=PUT, uri=coap_server_url, payload=json.dumps(data))
+        coap_request = Message(code=PUT, uri=coap_server_url, payload=str(data_str).encode())
 
         # Send the request
         response = await protocol.request(coap_request).response
