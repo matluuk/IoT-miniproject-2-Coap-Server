@@ -151,8 +151,7 @@
         // Function to fetch data from the Flask API
         function fetchData() {
             return new Promise((resolve, reject) => {
-                // fetch('http://34.88.232.103:5000/api/data')
-                fetch('http://localhost:5000/api/data')
+                fetch('http://34.88.232.103:5000/api/data')
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -312,8 +311,7 @@
 
         function getConfig() {
             return new Promise((resolve, reject) => {
-                // fetch('http://34.88.232.103:5000/api/config')
-                fetch('http://localhost:5000/api/config')
+                fetch('http://34.88.232.103:5000/api/config')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -339,19 +337,6 @@
                     console.error('Error:', error);  // Log any errors
                     reject(error);  // Reject the Promise if there's an error
                 });
-                // fetch('http://example.com/api', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify({
-                //         key1: 'value1',
-                //         key2: 'value2'
-                //     })
-                //     })
-                //     .then(response => response.json())
-                //     .then(data => console.log(data))
-                //     .catch(error => console.error(error))
 
             });
         }
@@ -368,22 +353,7 @@
                 "active_wait_timeout": active_wait_timeout,
                 "passive_wait_timeout": passive_wait_timeout
                 }
-            // (async () => {
-            // const rawResponse = await fetch('http://34.88.232.103:5000/api/config', {
-            //     method: 'PUT',
-            //     headers: {
-            //     'Accept': 'application/json',
-            //     'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify(data)
-            // });
-            // const content = await rawResponse.json();
-
-            // console.log(content);
-            // })();
-
-            // fetch('http://34.88.232.103:5000/api/config', {
-            fetch('http://localhost:5000/api/config', {
+            fetch('http://34.88.232.103:5000/api/config', {
                 method: 'PUT',
                 headers: {
                 'Accept': 'application/json',
