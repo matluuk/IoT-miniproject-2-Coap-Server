@@ -89,8 +89,11 @@ def config():
         # Create a new CoAP client
         protocol = await Context.create_client_context()
 
+        # Get the JSON data from the request
+        data = request.get_json()
+
         # Create a new GET coap_request
-        coap_request = Message(code=GET, uri=coap_server_url)
+        coap_request = Message(code=GET, uri=coap_server_url, payload=json.dumps(data))
 
         # Send the coap_request
         response = await protocol.request(coap_request).response
