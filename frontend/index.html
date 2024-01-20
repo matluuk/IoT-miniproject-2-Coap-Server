@@ -194,10 +194,11 @@
 
                 // Add a circle around the marker with a radius proportional to the accuracy
                 var circle = L.circle([data.latitude, data.longitude], {
-                    color: 'red',
-                    fillColor: '#f03',
-                    fillOpacity: 0.5,
-                    radius: data.accuracy
+                    color: '#0066ff',
+                    fillColor: '#0099ff',
+                    fillOpacity: 0.1,
+                    radius: data.accuracy,
+                    weight: 1
                 }).addTo(mymap);
             });
         }
