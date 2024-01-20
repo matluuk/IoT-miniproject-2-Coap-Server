@@ -84,7 +84,7 @@ def get_data():
 def config():
     async def handle_get():
         # Replace with your CoAP server's address
-        coap_server_url = f'coap://{server_ip_address}:{server_port}/data'
+        coap_server_url = f'coap://{server_ip_address}:{server_port}/config'
         
         # Create a new CoAP client
         protocol = await Context.create_client_context()
@@ -105,7 +105,7 @@ def config():
     
     async def handle_put():
         # Replace with your CoAP server's address
-        coap_server_url = f'coap://{server_ip_address}:{server_port}/data'
+        coap_server_url = f'coap://{server_ip_address}:{server_port}/config'
         
         # Create a new CoAP client
         protocol = await Context.create_client_context()
