@@ -99,11 +99,24 @@
 
         // Fetch the data when the page loads
         window.onload = function() {
+            setDatetimeDefaults()
             fetchData().then(centerView);
 
             // Fetch the data every 5 minutes
             setInterval(fetchData, 300000);
         };
+
+        function setDatetimeDefaults() {
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+            /* remove second/millisecond if needed - credit ref. https://stackoverflow.com/questions/24468518/html5-input-datetime-local-default-value-of-today-and-current-time#comment112871765_60884408 */
+            now.setDate(now.getDate() - 1)
+            now.setMilliseconds(null)
+            now.setSeconds(null)
+
+            document.getElementById('startTime').value = now.toISOString().slice(0, -1);
+        }
 
         // Function to fetch data from the Flask API
         function fetchData() {
@@ -194,6 +207,18 @@
                 selectedDataPoints = dataPoints.filter(function (data) {
                     var dataTime = new Date(Date.parse(data.time.replace(' ', 'T')));
                     return dataTime >= startTime && dataTime <= endTime;
+                });
+            } else if (!isNaN(startTime)) {
+                // Filter the data points
+                selectedDataPoints = dataPoints.filter(function (data) {
+                    var dataTime = new Date(Date.parse(data.time.replace(' ', 'T')));
+                    return dataTime >= startTime;
+                });
+            } else if (!isNaN(endTime)) {
+                // Filter the data points
+                selectedDataPoints = dataPoints.filter(function (data) {
+                    var dataTime = new Date(Date.parse(data.time.replace(' ', 'T')));
+                    return dataTime <= endTime;
                 });
             }
 
