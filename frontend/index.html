@@ -91,6 +91,11 @@
     </div>
 
     <script>
+        // var api_ip = '34.88.232.103'
+        var api_ip = '127.0.0.1'
+        var data_url = 'http://'+ api_ip + ':5000/api/data'
+        var config_url = 'http://'+ api_ip + ':5000/api/config'
+
         var mymap = L.map('mapid').setView([51.505, -0.09], 13);
 
         // Assign the tile layer to a variable
@@ -151,7 +156,7 @@
         // Function to fetch data from the Flask API
         function fetchData() {
             return new Promise((resolve, reject) => {
-                fetch('http://34.88.232.103:5000/api/data')
+                fetch(data_url)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
@@ -312,7 +317,7 @@
 
         function getConfig() {
             return new Promise((resolve, reject) => {
-                fetch('http://34.88.232.103:5000/api/config')
+                fetch(config_url)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -354,7 +359,7 @@
                 "active_wait_timeout": active_wait_timeout,
                 "passive_wait_timeout": passive_wait_timeout
                 }
-            fetch('http://34.88.232.103:5000/api/config', {
+            fetch(config_url, {
                 method: 'PUT',
                 headers: {
                 'Accept': 'application/json',
