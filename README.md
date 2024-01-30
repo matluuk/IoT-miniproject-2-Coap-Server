@@ -23,7 +23,13 @@ Frontend is the user interface for the location tracker. The interface is a simp
     - [SQL database](#sql-database)
     - [Backend unittests](#backend-unittests)
 - [Frontend](#frontend)
-
+    - [Flask app](#flask-app)
+    - [http server](#http-server)
+    - [Features](#features)
+    - [Start frontend](#start-frontend)
+- [Future development ideas](#future-development-ideas)
+    - [Frontend](#frontend-1)
+    - [Backend](#backend-1)
 - [Code Structure](#code-structure)
 - [Authors](#authors)
 
@@ -131,6 +137,8 @@ Connect to the linux VM, where you want the the CoAp server to be deployed.
 
 ### Install all the dependencies and set up the python3 virtual environment.
 
+If both frontend and backend are running on the same server, both can use same python venv. On every step, there are marked, if it is necessary step for setting up backend or frontend.
+
 1. Clone the repository to your folder of choise:
 
     ```bash
@@ -207,7 +215,6 @@ Connect to the linux VM, where you want the the CoAp server to be deployed.
 
 ## Backend
 
-
 ### Start backend
 
 1. Check the external ipv4 address for your VM. For google cloud VM it can be found on the **VM instances** tab
@@ -247,20 +254,104 @@ Some unittest for the CoAp server backend are implemented. To run the unittests 
 
 ## Frontend
 
+### Flask app
+
+Flask app is used to redirect http traffic from the website to the CoAp server. 
+
+### http server
+
+Python http server to run the website with user interface for the location tracker. 
+
+### Features
+
+- **Map** 
+    - The website has a map, where location data can be seen.
+    - Locaiton data is shown with blue markers on the map. The location marker opacity is varied to see, which marker is the newest.
+    - Locaiton accuracy is show with a blue circle.
+    - Selected marker is shown with a red color
+
+- **Location data filtering** 
+    - Locaiton data can be feltered so that only location data from specific time period is shown.
+
+- **Edit device config** 
+     -The location tracker device config can be modified from the website.
+
+- **List of filtered lcoation fixes**
+    - The list shows all location fixes shown on the map.
+    - A specific locaiton fix can be selected from the list to see it on the map.
+
+### Start frontend
+
+1. Change ip addresses and ports inside start_server.sh
+    This defines to which ip address the flask app and http server is bind.
+    ```bash
+    app_ip="127.0.0.1"
+    app_port="5000"
+
+    CoAp_server_ip="127.0.0.1"
+    CoAp_server_port="5683"
+
+    http_server_ip="127.0.0.1"
+    http_server_port="8000"
+
+    ```
+2. Change api_ip parameter in index.html to the flask app ip address on line 94:
+    ```javascript
+    var api_ip = '127.0.0.1'
+    ```
+
+3. Start the fronend using the start_server.sh script. 
+The shell script starts the flask app and python http server using nohup. 
+```bash
+sh start_server.sh
+```
+
+Press `enter` to go back to console. 
+
+The `start_server.sh` uses nohup to start the server. Flask app's output is redirected to nohup_app.log. Python http server's output is rediorected to nnohup_server.log. 
+
+Server are now running on the background and can be stopped using the `stop_server.sh` script.
+```bash
+sh stop_server.sh
+```
+
+## Future development ideas
+
+### frontend
+- Implement https to the website
+- Add support for mobile devices to the 
+- Improve the user interface of the website
+- Add login for preventing unwanted traffic on the website
+- Add possibilities to configure the user interface
+
+### backend
+- integrate https proxy to the backend
+- Add support for multiple location trackers - Some functionalities are implemented
 
 ## Code Structure
 
-// TODO:
-
-The project has the following code structure:
+The CoAp server has the following code structure:
 
 ```plaintext
 .
-├── server.py
-├── start_server.sh
-├── stop_server.sh
 ├── images
 │   └── ...
+├── backend
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── test_database.py
+│   │   ├── test_server.py
+│   │   └── utils.py
+│   ├── database.py
+│   ├── server.py
+│   ├── start_server.sh
+│   └── stop_server.sh
+├── frontend
+│   ├── app.py
+│   ├── index.html
+│   ├── server.py
+│   ├── start_server.sh
+│   └── stop_server.sh
 └── README.md
 ```
 
